@@ -2,7 +2,7 @@
 
 Static asset hosting for EvoBuilt — team headshots, logos, and signature images.
 
-Served via GitHub Pages at: https://robby-dotcom.github.io/evobuilt-assets/
+Served via GitHub Pages at: https://robby-dotcom.github.io/evobuilt-email-signature/
 
 ## Structure
 
@@ -14,7 +14,7 @@ logos/        - EvoBuilt logos, awards, social icons
 ## Usage
 
 Reference images via stable URLs:
-- `https://robby-dotcom.github.io/evobuilt-assets/headshots/Robby.jpg`
-- `https://robby-dotcom.github.io/evobuilt-assets/logos/evobuilt-logo.png`
+- `https://robby-dotcom.github.io/evobuilt-email-signature/headshots/Robby.jpg`
+- `https://robby-dotcom.github.io/evobuilt-email-signature/logos/evobuilt-logo.png`
 
 Used in the EvoBuilt Email Signature Generator.
