@@ -8,14 +8,16 @@ export type SeedCourse = Course & { id: string; location: string }
  */
 export const SEED_COURSES: SeedCourse[] = [
   {
-    id: 'seed-ocean-shores-black',
-    name: 'Ocean Shores — Black tees',
+    id: 'seed-ocean-shores',
+    name: 'Ocean Shores',
     location: '',
-    tee: 'Black',
-    rating: 76.5,
-    slope: 130,
-    pars: [5, 3, 4, 4, 5, 3, 5, 4, 3, 4, 4, 4, 4, 5, 3, 4, 5, 3],
-    strokeIndex: [7, 17, 1, 11, 9, 15, 5, 3, 13, 2, 16, 6, 14, 8, 12, 4, 10, 18],
+    // Straight off the club's own scorecard: six par 3s, six 4s, six 5s.
+    pars: [5, 4, 3, 5, 4, 3, 4, 3, 5, 4, 5, 3, 4, 5, 3, 4, 3, 5],
+    // Provisional. A 10 handicap on the club card takes a shot on holes
+    // 2, 4, 5, 9, 10, 11, 12, 13, 14 and 16, so those ten are stroke index
+    // 1-10 and the other eight are 11-18. The order inside each group is a
+    // guess until the printed index is to hand — check it before playing.
+    strokeIndex: [11, 1, 13, 2, 3, 15, 16, 17, 4, 5, 6, 7, 8, 9, 12, 10, 14, 18],
   },
 ]
 
@@ -26,8 +28,8 @@ export const SEED_COURSES: SeedCourse[] = [
 export const PAR_PRESETS: { label: string; hint: string; pars: number[] }[] = [
   {
     label: 'Ocean Shores',
-    hint: 'The layout above — five 3s, eight 4s, five 5s',
-    pars: [5, 3, 4, 4, 5, 3, 5, 4, 3, 4, 4, 4, 4, 5, 3, 4, 5, 3],
+    hint: 'Six 3s, six 4s, six 5s — the club card',
+    pars: [5, 4, 3, 5, 4, 3, 4, 3, 5, 4, 5, 3, 4, 5, 3, 4, 3, 5],
   },
   {
     label: 'Standard 72',
