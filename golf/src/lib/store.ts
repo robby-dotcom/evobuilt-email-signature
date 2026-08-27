@@ -7,6 +7,7 @@ import {
   type Course, type HoleEntry, type Player, type RoundSettings,
   DEFAULT_SETTINGS, emptyHole,
 } from './scoring'
+import { API_BASE, API_KEY } from './config'
 
 export interface LocalRound {
   code: string
@@ -91,9 +92,13 @@ const enqueue = (item: QueueItem) => {
 }
 
 const api = async (path: string, init?: RequestInit) => {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
+    headers: {
+      'content-type': 'application/json',
+      ...(API_KEY ? { apikey: API_KEY, authorization: `Bearer ${API_KEY}` } : {}),
+      ...(init?.headers ?? {}),
+    },
   })
   if (!res.ok) throw new Error(`${res.status}`)
   return res.json()
