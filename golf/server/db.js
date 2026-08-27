@@ -50,7 +50,8 @@ export const makeCode = () =>
   Array.from({ length: 6 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('')
 
 export async function listCourses() {
-  return q(`select id, name, location, pars, stroke_index as "strokeIndex"
+  return q(`select id, name, location, tee, rating, slope,
+                   pars, stroke_index as "strokeIndex"
             from golf.courses order by name`)
 }
 

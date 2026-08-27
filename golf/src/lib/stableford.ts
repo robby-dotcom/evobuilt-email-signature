@@ -31,3 +31,30 @@ export function stablefordPoints(
   if (gross == null) return 0
   return Math.max(0, 2 - (gross - strokes - par))
 }
+
+/**
+ * WHS course handicap from an exact GA index.
+ *
+ *   course handicap = round(index × slope ÷ 113 + (rating − par))
+ *
+ * The rating term is what people miss: a tee rated above par is harder than par
+ * by that margin, and the difference is given back as shots. Off a 76.5/130 tee
+ * at par 72, a 9.9 index plays off 16, not 10 — the 4.5 comes from the tees, not
+ * from the format or the opposition.
+ */
+export function courseHandicap(
+  index: number,
+  rating: number,
+  slope: number,
+  par: number,
+): number {
+  return Math.round(index * (slope / 113) + (rating - par))
+}
+
+/**
+ * Shots actually received after any competition allowance. 100% is full shots;
+ * Golf Australia's fourball standard is 85%. Applied to the rounded course
+ * handicap, per WHS, not folded into the line above.
+ */
+export const playingHandicap = (courseHcp: number, allowancePercent = 100): number =>
+  Math.round((courseHcp * allowancePercent) / 100)

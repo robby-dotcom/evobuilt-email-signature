@@ -42,6 +42,9 @@ export default function App() {
   const [pending, setPending] = useState(0)
   const [database, setDatabase] = useState(false)
   const [joinCode, setJoinCode] = useState('')
+  // A course you just entered is the one you meant to play; without this the
+  // picker stays on whatever sorted first and the round uses the wrong card.
+  const [pickedCourse, setPickedCourse] = useState<string | undefined>()
   const [busy, setBusy] = useState<string | null>(null)
 
   /* Health + course list. Both degrade to local-only without complaint. */
@@ -114,10 +117,13 @@ export default function App() {
   const saveCourse = useCallback((course: StoredCourse) => {
     // Seeds are always folded back in, or saving one course would drop the rest.
     const withSeeds = (list: StoredCourse[]) => store.mergeCourses(list, SEED_COURSES)
-    setCourses(withSeeds(store.saveLocalCourse(course)))
+    const saved = store.saveLocalCourse(course)
+    setCourses(withSeeds(saved))
+    setPickedCourse(saved.find((c) => c.name === course.name)?.id)
     void store.saveCourse(course)
-      .then((saved: StoredCourse) => {
-        setCourses(withSeeds(store.mergeCourses([saved], store.loadLocalCourses())))
+      .then((remote: StoredCourse) => {
+        setCourses(withSeeds(store.mergeCourses([remote], store.loadLocalCourses())))
+        if (remote?.id) setPickedCourse(remote.id)
       })
       .catch(() => { /* the local copy already holds it */ })
     setView('setup')
@@ -167,6 +173,7 @@ export default function App() {
           courses={courses}
           defaultSeries={store.listLocalRounds()[0]?.seriesCode ?? ''}
           defaultPlayers={lastLineUp()}
+          initialCourseId={pickedCourse}
           onNewCourse={() => setView('course')}
           onStart={startRound}
           onCancel={goHome}

@@ -191,9 +191,18 @@ export function saveLocalCourse(course: StoredCourse): StoredCourse[] {
   return next
 }
 
-/** Server list wins on conflict; anything only held locally is kept. */
+/**
+ * Server list wins on conflict, except where the local copy carries a tee
+ * rating the server's does not — losing that would silently drop everyone back
+ * to typing shots by hand, and the round would be scored off the wrong figures.
+ */
 export function mergeCourses(server: StoredCourse[], local: StoredCourse[]): StoredCourse[] {
-  const names = new Set(server.map((c) => c.name.toLowerCase()))
-  return [...server, ...local.filter((c) => !names.has(c.name.toLowerCase()))]
+  const byName = new Map(local.map((c) => [c.name.toLowerCase(), c]))
+  const merged = server.map((c) => {
+    const mine = byName.get(c.name.toLowerCase())
+    return mine && mine.rating != null && c.rating == null ? { ...c, ...mine, id: c.id } : c
+  })
+  const seen = new Set(merged.map((c) => c.name.toLowerCase()))
+  return [...merged, ...local.filter((c) => !seen.has(c.name.toLowerCase()))]
     .sort((a, b) => a.name.localeCompare(b.name))
 }

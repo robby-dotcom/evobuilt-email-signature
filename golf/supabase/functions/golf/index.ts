@@ -35,13 +35,14 @@ async function getRound(code: string) {
            r.stake_cents as "stakeCents",
            r.carry_across_segments as "carryAcrossSegments",
            r.one_skin_per_team as "oneSkinPerTeam", r.status,
+           r.handicap_allowance as "handicapAllowance",
            c.id as "courseId", c.name as "courseName", c.location as "courseLocation",
-           c.pars, c.stroke_index as "strokeIndex"
+           c.tee, c.rating, c.slope, c.pars, c.stroke_index as "strokeIndex"
     from golf.rounds r join golf.courses c on c.id = r.course_id
     where r.code = ${code}`
   if (!round) return null
   round.players = await sql`
-    select slot, name, handicap from golf.round_players
+    select slot, name, handicap, handicap_index as "index" from golf.round_players
     where round_id = (select id from golf.rounds where code = ${code}) order by slot`
   round.holes = await sql`
     select hole, strokes, in_sand as "inSand", ctp_slot as "ctpSlot",
@@ -64,11 +65,13 @@ Deno.serve(async (req) => {
     if (parts[0] === 'courses') {
       if (req.method === 'GET') {
         return json(await sql`
-          select id, name, location, pars, stroke_index as "strokeIndex"
+          select id, name, location, tee, rating, slope,
+                 pars, stroke_index as "strokeIndex"
           from golf.courses order by name`)
       }
       const body = await req.json()
-      const { name, location = '', pars, strokeIndex } = body ?? {}
+      const { name, location = '', tee = null, rating = null, slope = null,
+              pars, strokeIndex } = body ?? {}
       if (!name || !Array.isArray(pars) || pars.length !== 18) {
         return json({ error: 'bad_course' }, 400)
       }
@@ -76,12 +79,14 @@ Deno.serve(async (req) => {
         return json({ error: 'bad_stroke_index' }, 400)
       }
       const [saved] = await sql`
-        insert into golf.courses (name, location, pars, stroke_index)
-        values (${name}, ${location}, ${pars}, ${strokeIndex})
+        insert into golf.courses (name, location, tee, rating, slope, pars, stroke_index)
+        values (${name}, ${location}, ${tee}, ${rating}, ${slope}, ${pars}, ${strokeIndex})
         on conflict (lower(name)) do update
-          set location = excluded.location, pars = excluded.pars,
-              stroke_index = excluded.stroke_index
-        returning id, name, location, pars, stroke_index as "strokeIndex"`
+          set location = excluded.location, tee = excluded.tee,
+              rating = excluded.rating, slope = excluded.slope,
+              pars = excluded.pars, stroke_index = excluded.stroke_index
+        returning id, name, location, tee, rating, slope,
+                  pars, stroke_index as "strokeIndex"`
       return json(saved)
     }
 
@@ -108,19 +113,20 @@ Deno.serve(async (req) => {
         await sql`
           insert into golf.rounds
             (code, series_code, course_id, name, played_on, stake_cents,
-             carry_across_segments, one_skin_per_team)
+             carry_across_segments, one_skin_per_team, handicap_allowance)
           values (${code}, ${b.seriesCode ?? ''}, ${b.courseId}, ${b.name ?? ''},
                   ${b.playedOn ?? new Date().toISOString().slice(0, 10)},
                   ${b.stakeCents ?? 500}, ${b.carryAcrossSegments ?? true},
-                  ${b.oneSkinPerTeam ?? true})
+                  ${b.oneSkinPerTeam ?? true}, ${b.handicapAllowance ?? 100})
           on conflict (code) do update set updated_at = now()`
         for (const [slot, p] of (b.players ?? []).entries()) {
           await sql`
-            insert into golf.round_players (round_id, slot, name, handicap)
+            insert into golf.round_players (round_id, slot, name, handicap, handicap_index)
             values ((select id from golf.rounds where code = ${code}),
-                    ${slot}, ${p.name}, ${p.handicap ?? 0})
+                    ${slot}, ${p.name}, ${p.handicap ?? 0}, ${p.index ?? null})
             on conflict (round_id, slot) do update
-              set name = excluded.name, handicap = excluded.handicap`
+              set name = excluded.name, handicap = excluded.handicap,
+                  handicap_index = excluded.handicap_index`
         }
         return json(await getRound(code))
       }

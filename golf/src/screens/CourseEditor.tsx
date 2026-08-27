@@ -15,6 +15,9 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
 }) {
   const [name, setName] = useState(initial?.name ?? '')
   const [location, setLocation] = useState(initial?.location ?? '')
+  const [tee, setTee] = useState(initial?.tee ?? '')
+  const [rating, setRating] = useState(initial?.rating != null ? String(initial.rating) : '')
+  const [slope, setSlope] = useState(initial?.slope != null ? String(initial.slope) : '')
   const [pars, setPars] = useState<number[]>(initial?.pars ?? Array(18).fill(4))
   const [index, setIndex] = useState<number[]>(
     initial?.strokeIndex ?? [1, 3, 5, 7, 9, 11, 13, 15, 17, 2, 4, 6, 8, 10, 12, 14, 16, 18],
@@ -43,8 +46,27 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
         </Field>
         <Field label="Where" hint="Optional — handy once there are a few dozen of these.">
           <input className={inputClass} value={location} onChange={(e) => setLocation(e.target.value)}
-            placeholder="Ocean Shores, NSW" autoComplete="off" />
+            placeholder="Ocean Shores" autoComplete="off" />
         </Field>
+        <div className="grid grid-cols-3 gap-2">
+          <Field label="Tees">
+            <input className={inputClass} value={tee} onChange={(e) => setTee(e.target.value)}
+              placeholder="Black" autoComplete="off" />
+          </Field>
+          <Field label="Rating">
+            <input type="number" inputMode="decimal" step={0.1} className={`${inputClass} tnum`}
+              value={rating} onChange={(e) => setRating(e.target.value)} placeholder="76.5" />
+          </Field>
+          <Field label="Slope">
+            <input type="number" inputMode="numeric" className={`${inputClass} tnum`}
+              value={slope} onChange={(e) => setSlope(e.target.value)} placeholder="130" />
+          </Field>
+        </div>
+        <p className="text-xs text-slate-500">
+          Both are printed on the card, next to the tee colour. With them, players
+          enter a GA index and the app works out the shots; without them, they
+          enter shots directly.
+        </p>
       </Card>
 
       <Card className="p-3">
@@ -128,7 +150,17 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
         <Button
           className="flex-[2]"
           disabled={!canSave}
-          onClick={() => onSave({ id: initial?.id, name: name.trim(), location, pars, strokeIndex: index })}
+          onClick={() => onSave({
+            id: initial?.id,
+            name: name.trim(),
+            location,
+            pars,
+            strokeIndex: index,
+            ...(tee.trim() ? { tee: tee.trim() } : {}),
+            ...(rating !== '' && slope !== ''
+              ? { rating: Number(rating), slope: Number(slope) }
+              : {}),
+          })}
         >
           Save course
         </Button>

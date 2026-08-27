@@ -25,12 +25,24 @@ export interface Course {
   pars: number[]
   /** 18 entries, hole 1 first. A permutation of 1..18. */
   strokeIndex: number[]
+  /** Which set of tees the rating below belongs to, e.g. "Black". */
+  tee?: string
+  /** Scratch rating for the tee. With slope, turns a GA index into shots. */
+  rating?: number
+  /** Slope rating for the tee, 55-155. */
+  slope?: number
 }
+
+/** A course can only convert an index if it carries both figures. */
+export const isRated = (c: Course): boolean =>
+  typeof c.rating === 'number' && typeof c.slope === 'number'
 
 export interface Player {
   name: string
-  /** Playing handicap — the number written on the card. */
+  /** Shots actually received. This is what the scoring engine uses. */
   handicap: number
+  /** Exact GA index as typed, when the course is rated. Display only. */
+  index?: number
 }
 
 export interface HoleEntry {

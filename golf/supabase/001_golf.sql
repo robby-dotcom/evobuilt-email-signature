@@ -9,6 +9,11 @@ create table if not exists golf.courses (
   location      text not null default '',
   pars          smallint[] not null,
   stroke_index  smallint[] not null,
+  -- A tee's rating and slope turn a GA index into shots. Nullable: a course
+  -- entered without a card still works on typed-in shots.
+  tee           text,
+  rating        numeric(4,1),
+  slope         smallint check (slope is null or slope between 55 and 155),
   created_at    timestamptz not null default now(),
   constraint courses_18_pars  check (array_length(pars, 1) = 18),
   constraint courses_18_index check (array_length(stroke_index, 1) = 18)
@@ -25,6 +30,7 @@ create table if not exists golf.rounds (
   stake_cents           integer not null default 500,
   carry_across_segments boolean not null default true,
   one_skin_per_team     boolean not null default true,
+  handicap_allowance    smallint not null default 100,
   status                text not null default 'in_progress',
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
@@ -34,8 +40,11 @@ create index if not exists rounds_series_idx on golf.rounds (series_code);
 create table if not exists golf.round_players (
   round_id  uuid not null references golf.rounds(id) on delete cascade,
   slot      smallint not null check (slot between 0 and 3),
-  name      text not null,
-  handicap  smallint not null default 0,
+  name            text not null,
+  -- handicap is the shots actually received and is what the engine uses;
+  -- handicap_index records what the player typed, when the course is rated.
+  handicap        smallint not null default 0,
+  handicap_index  numeric(4,1),
   primary key (round_id, slot)
 );
 

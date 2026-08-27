@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { strokesReceived, stablefordPoints, SLOTS, type Slot } from './stableford'
+import {
+  strokesReceived, stablefordPoints, courseHandicap, playingHandicap,
+  SLOTS, type Slot,
+} from './stableford'
 import {
   computeRound, teamsForHole, settle, validateStrokeIndex, validatePars,
   emptyHole, DEFAULT_SETTINGS, formatMoney,
@@ -50,8 +53,48 @@ describe('handicap stroke allocation', () => {
     expect(strokesReceived(-2, 1)).toBe(0)
   })
 
+  it('gives a 16 handicap a shot on every hole but the two easiest', () => {
+    for (let si = 1; si <= 16; si++) expect(strokesReceived(16, si)).toBe(1)
+    expect(strokesReceived(16, 17)).toBe(0)
+    expect(strokesReceived(16, 18)).toBe(0)
+  })
+
   it('gives a scratch player nothing', () => {
     for (let si = 1; si <= 18; si++) expect(strokesReceived(0, si)).toBe(0)
+  })
+})
+
+describe('course handicap from a GA index', () => {
+  // Ocean Shores, black tees: par 72, rating 76.5, slope 130.
+  const OS = (index: number) => courseHandicap(index, 76.5, 130, 72)
+
+  it('gives a 9.9 index sixteen shots off the blacks, not ten', () => {
+    expect(OS(9.9)).toBe(16)
+  })
+
+  it('gives back the rating difference even to a scratch player', () => {
+    expect(OS(0)).toBe(5)          // 76.5 - 72 = 4.5, rounded
+  })
+
+  it('returns the index itself when the tee is standard', () => {
+    // slope 113 and rating equal to par is the neutral case by definition.
+    expect(courseHandicap(9.9, 72, 113, 72)).toBe(10)
+    expect(courseHandicap(18, 72, 113, 72)).toBe(18)
+  })
+
+  it('scales with slope', () => {
+    expect(courseHandicap(10, 72, 155, 72)).toBe(14)
+    expect(courseHandicap(10, 72, 100, 72)).toBe(9)
+  })
+
+  it('handles a plus marker', () => {
+    expect(courseHandicap(-2, 72, 113, 72)).toBe(-2)
+  })
+
+  it('applies a competition allowance to the rounded figure', () => {
+    expect(playingHandicap(16)).toBe(16)          // full shots
+    expect(playingHandicap(16, 100)).toBe(16)
+    expect(playingHandicap(16, 85)).toBe(14)      // GA fourball standard
   })
 })
 
