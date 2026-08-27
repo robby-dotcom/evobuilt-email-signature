@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { HoleEntry } from './lib/scoring'
 import { computeRound, formatMoney } from './lib/scoring'
 import * as store from './lib/store'
-import { SEED_COURSES } from './lib/seedCourses'
+import { DEFAULT_PLAYERS, SEED_COURSES } from './lib/seedCourses'
 import type { LocalRound, StoredCourse } from './lib/store'
 import Play from './screens/Play'
 import Board from './screens/Board'
@@ -152,6 +152,7 @@ export default function App() {
         <Setup
           courses={courses}
           defaultSeries={store.listLocalRounds()[0]?.seriesCode ?? ''}
+          defaultPlayers={lastLineUp()}
           onNewCourse={() => setView('course')}
           onStart={startRound}
           onCancel={goHome}
@@ -303,6 +304,13 @@ const Splash = ({ children }: { children: React.ReactNode }) => (
     <p className="text-lg font-semibold text-slate-600">{children}</p>
   </div>
 )
+
+/** Saturday should not mean retyping Friday's names and handicaps. */
+function lastLineUp() {
+  const previous = store.listLocalRounds()[0]?.players
+  if (previous?.length === 4) return previous
+  return DEFAULT_PLAYERS.map((name) => ({ name, handicap: 0 }))
+}
 
 const firstUnplayed = (r: LocalRound) => {
   const at = r.entries.findIndex((e) => e.strokes.some((s) => s == null))

@@ -38,3 +38,9 @@ export const PAR_PRESETS: { label: string; hint: string; pars: number[] }[] = [
     pars: Array(18).fill(4),
   },
 ]
+
+/**
+ * Tomorrow's four, in the order that sets the draw: 1&2, then 1&3, then 1&4.
+ * Only used when there is no previous round to carry a line-up forward from.
+ */
+export const DEFAULT_PLAYERS = ['Luke', 'Adam', 'Robby', 'Will']

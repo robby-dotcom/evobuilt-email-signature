@@ -10,16 +10,22 @@ export interface SetupResult {
   settings: RoundSettings
 }
 
-export default function Setup({ courses, onNewCourse, onStart, onCancel, defaultSeries }: {
+export default function Setup({
+  courses, onNewCourse, onStart, onCancel, defaultSeries, defaultPlayers,
+}: {
   courses: (Course & { id?: string; location?: string })[]
   onNewCourse: () => void
   onStart: (result: SetupResult) => void
   onCancel: () => void
   defaultSeries: string
+  defaultPlayers: Player[]
 }) {
   const [courseId, setCourseId] = useState(courses[0]?.id ?? '')
-  const [players, setPlayers] = useState<Player[]>(
-    Array.from({ length: 4 }, () => ({ name: '', handicap: 0 })),
+  const [players, setPlayers] = useState<Player[]>(() =>
+    Array.from({ length: 4 }, (_, i) => ({
+      name: defaultPlayers[i]?.name ?? '',
+      handicap: defaultPlayers[i]?.handicap ?? 0,
+    })),
   )
   const [seriesCode, setSeriesCode] = useState(defaultSeries)
   const [stake, setStake] = useState(5)
@@ -60,7 +66,9 @@ export default function Setup({ courses, onNewCourse, onStart, onCancel, default
         <div className="border-b border-slate-100 px-3 py-2">
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Players</h2>
           <p className="mt-0.5 text-xs text-slate-500">
-            Order sets the partnerships: 1&amp;2, then 1&amp;3, then 1&amp;4.
+            Order sets the draw: {playerName(players, 0)} &amp; {playerName(players, 1)} first,
+            then {playerName(players, 0)} &amp; {playerName(players, 2)},
+            then {playerName(players, 0)} &amp; {playerName(players, 3)}.
           </p>
         </div>
         <ul className="divide-y divide-slate-100">
@@ -132,6 +140,8 @@ export default function Setup({ courses, onNewCourse, onStart, onCancel, default
     </div>
   )
 }
+
+const playerName = (players: Player[], i: number) => players[i]?.name.trim() || `P${i + 1}`
 
 function Toggle({ checked, onChange, label, hint }: {
   checked: boolean; onChange: (v: boolean) => void; label: string; hint: string
