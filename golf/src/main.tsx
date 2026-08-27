@@ -11,6 +11,9 @@ createRoot(document.getElementById('root')!).render(
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => { /* offline is a bonus, not a gate */ })
+    const base = import.meta.env.BASE_URL || '/'
+    navigator.serviceWorker
+      .register(`${base}sw.js`, { scope: base })
+      .catch(() => { /* offline is a bonus, not a gate */ })
   })
 }

@@ -1,7 +1,7 @@
 // Cache the shell so the app opens with no signal. Scores live in localStorage
 // and sync through the queue in store.ts, so the API is never cached.
 const CACHE = 'hollywood-v1'
-const SHELL = ['/', '/manifest.json']
+const SHELL = ['./', './manifest.json']
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()))
@@ -27,10 +27,10 @@ self.addEventListener('fetch', (e) => {
       fetch(request)
         .then((res) => {
           const copy = res.clone()
-          caches.open(CACHE).then((c) => c.put('/', copy))
+          caches.open(CACHE).then((c) => c.put('./', copy))
           return res
         })
-        .catch(() => caches.match('/').then((r) => r ?? Response.error())),
+        .catch(() => caches.match('./').then((r) => r ?? Response.error())),
     )
     return
   }
