@@ -13,7 +13,8 @@
     "start": "node server/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build:selfhosted": "VITE_API_BASE=/api VITE_API_KEY= vite build"
+    "build:selfhosted": "VITE_API_BASE=/api VITE_API_KEY= vite build",
+    "build:pages": "vite build --base=./ --outDir dist-pages"
   },
   "dependencies": {
     "pg": "^8.13.1",

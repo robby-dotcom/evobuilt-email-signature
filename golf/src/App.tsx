@@ -13,10 +13,25 @@ import { Button, Card, Empty, SyncBadge, inputClass } from './components/ui'
 
 type View = 'home' | 'setup' | 'course' | 'play' | 'board' | 'settle'
 
+/**
+ * Round links have to survive hosts with no rewrite rules (GitHub Pages, plain
+ * object storage), so the code is read from the hash as well as the path and
+ * written to whichever form the app was opened with.
+ */
+const usesHash = () =>
+  window.location.hash.startsWith('#/') ||
+  !/^\/(r\/)?$|^\/r\//.test(window.location.pathname)
+
 const codeFromPath = () => {
-  const m = window.location.pathname.match(/^\/r\/([A-Za-z0-9]{4,10})/)
+  const from = (s: string) => s.match(/\/r\/([A-Za-z0-9]{4,10})/)
+  const m = from(window.location.hash) ?? from(window.location.pathname)
   return m ? m[1].toUpperCase() : null
 }
+
+const linkFor = (code: string) =>
+  usesHash() ? `${window.location.pathname}#/r/${code}` : `/r/${code}`
+
+const homeLink = () => (usesHash() ? `${window.location.pathname}#/` : '/')
 
 export default function App() {
   const [view, setView] = useState<View>(() => (codeFromPath() ? 'play' : 'home'))
@@ -65,13 +80,13 @@ export default function App() {
   const openRound = useCallback((next: LocalRound, at: View = 'play') => {
     setRound(next)
     setView(at)
-    window.history.pushState({}, '', `/r/${next.code}`)
+    window.history.pushState({}, '', linkFor(next.code))
   }, [])
 
   const goHome = useCallback(() => {
     setRound(null)
     setView('home')
-    window.history.pushState({}, '', '/')
+    window.history.pushState({}, '', homeLink())
   }, [])
 
   const onEntry = useCallback((h: number, entry: HoleEntry) => {
