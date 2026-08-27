@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { validatePars, validateStrokeIndex, type Course } from '../lib/scoring'
+import { PAR_PRESETS } from '../lib/seedCourses'
 import { Button, Card, Field, inputClass } from '../components/ui'
 
 /**
@@ -44,6 +45,25 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
           <input className={inputClass} value={location} onChange={(e) => setLocation(e.target.value)}
             placeholder="Ocean Shores, NSW" autoComplete="off" />
         </Field>
+      </Card>
+
+      <Card className="p-3">
+        <p className="mb-2 text-sm font-bold text-slate-700">Start from a layout</p>
+        <div className="flex gap-1">
+          {PAR_PRESETS.map((preset) => (
+            <button
+              key={preset.label}
+              title={preset.hint}
+              onClick={() => setPars([...preset.pars])}
+              className="min-h-[3rem] flex-1 rounded-xl bg-slate-100 px-1 text-sm font-bold active:bg-slate-200"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-slate-500">
+          Then correct any hole below and type the stroke index off the card.
+        </p>
       </Card>
 
       <Card className="overflow-hidden">

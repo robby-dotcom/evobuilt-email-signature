@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { HoleEntry } from './lib/scoring'
 import { computeRound, formatMoney } from './lib/scoring'
 import * as store from './lib/store'
+import { SEED_COURSES } from './lib/seedCourses'
 import type { LocalRound, StoredCourse } from './lib/store'
 import Play from './screens/Play'
 import Board from './screens/Board'
@@ -21,7 +22,9 @@ export default function App() {
   const [view, setView] = useState<View>(() => (codeFromPath() ? 'play' : 'home'))
   const [round, setRound] = useState<LocalRound | null>(null)
   const [hole, setHole] = useState(1)
-  const [courses, setCourses] = useState<StoredCourse[]>(() => store.loadLocalCourses())
+  const [courses, setCourses] = useState<StoredCourse[]>(
+    () => store.mergeCourses(store.loadLocalCourses(), SEED_COURSES),
+  )
   const [pending, setPending] = useState(0)
   const [database, setDatabase] = useState(false)
   const [joinCode, setJoinCode] = useState('')
@@ -31,9 +34,10 @@ export default function App() {
   useEffect(() => {
     void store.health().then((h) => setDatabase(Boolean(h.database && h.dbReady)))
     void store.fetchCourses().then((server: StoredCourse[]) => {
-      if (Array.isArray(server) && server.length) {
-        setCourses(store.mergeCourses(server, store.loadLocalCourses()))
-      }
+      const local = store.mergeCourses(store.loadLocalCourses(), SEED_COURSES)
+      setCourses(Array.isArray(server) && server.length
+        ? store.mergeCourses(server, local)
+        : local)
     })
   }, [])
 
@@ -94,12 +98,14 @@ export default function App() {
   }, [openRound])
 
   const saveCourse = useCallback((course: StoredCourse) => {
-    setCourses(store.saveLocalCourse(course))
+    // Seeds are always folded back in, or saving one course would drop the rest.
+    const withSeeds = (list: StoredCourse[]) => store.mergeCourses(list, SEED_COURSES)
+    setCourses(withSeeds(store.saveLocalCourse(course)))
     void store.saveCourse(course)
       .then((saved: StoredCourse) => {
-        setCourses(store.mergeCourses([saved], store.loadLocalCourses()))
+        setCourses(withSeeds(store.mergeCourses([saved], store.loadLocalCourses())))
       })
-      .catch(() => { /* local copy already holds it */ })
+      .catch(() => { /* the local copy already holds it */ })
     setView('setup')
   }, [])
 
