@@ -43,31 +43,52 @@ export default function Play({ round, hole, onHole, onEntry, onBoard }: Props) {
 
   return (
     <div className="pb-32">
-      <header className="sticky top-0 z-20 bg-white shadow-sm">
-        <div className="flex items-baseline justify-between px-4 pt-3">
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-black tnum">{hole}</span>
-            <span className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              Par {par} · SI {strokeIndex}
+      <header className="sticky top-0 z-20 border-b border-line bg-surface">
+        <div className="flex items-center gap-3 px-4 pt-3">
+          <span className="display text-5xl font-black leading-none">{hole}</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-bold uppercase tracking-widest text-ink-faint tnum">
+              Par {par} · Index {strokeIndex}
+            </span>
+            <span className="text-xs font-semibold text-ink-faint">
+              leg {segmentOf(hole) + 1} of 3
             </span>
           </div>
           {result.carryIn > 0 && (
-            <span className="rounded-full bg-amber-500 px-3 py-1 text-sm font-bold text-white tnum">
-              carry {result.carryIn}
+            <span className="pop ml-auto rounded-full bg-gold px-3 py-1.5 text-sm font-black text-surface tnum">
+              +{result.carryIn} carried
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 px-4 pb-2 pt-1 text-sm font-bold">
-          <span className={TEAM_STYLE[0].text}>
+
+        <div className="flex items-center gap-2 px-4 pb-2 pt-2 text-sm font-bold">
+          <span className={`flex items-center gap-1.5 ${TEAM_STYLE[0].text}`}>
+            <span className={`h-2.5 w-2.5 rounded-full ${TEAM_STYLE[0].bg}`} />
             {name(teams[0][0])} &amp; {name(teams[0][1])}
           </span>
-          <span className="text-slate-400">v</span>
-          <span className={TEAM_STYLE[1].text}>
+          <span className="text-ink-faint">v</span>
+          <span className={`flex items-center gap-1.5 ${TEAM_STYLE[1].text}`}>
+            <span className={`h-2.5 w-2.5 rounded-full ${TEAM_STYLE[1].bg}`} />
             {name(teams[1][0])} &amp; {name(teams[1][1])}
           </span>
-          <span className="ml-auto text-xs font-semibold text-slate-400">
-            leg {segmentOf(hole) + 1}/3
-          </span>
+        </div>
+
+        {/* Where you are, what is left, and who took what — one tap per hole. */}
+        <div className="flex gap-[3px] px-3 pb-2">
+          {totals.holes.map((h) => (
+            <button
+              key={h.hole}
+              onClick={() => onHole(h.hole)}
+              aria-label={`Hole ${h.hole}`}
+              className={`h-1.5 flex-1 rounded-full transition-[background-color] ${
+                h.hole === hole ? 'bg-ink'
+                  : h.winner === 0 ? TEAM_STYLE[0].bg
+                  : h.winner === 1 ? TEAM_STYLE[1].bg
+                  : h.settled ? 'bg-ink-faint'
+                  : 'bg-line'
+              }`}
+            />
+          ))}
         </div>
       </header>
 
@@ -82,7 +103,7 @@ export default function Play({ round, hole, onHole, onEntry, onBoard }: Props) {
             <Card key={slot} className={`overflow-hidden ${gross == null ? 'opacity-95' : ''}`}>
               <div className={`flex items-center gap-2 px-3 py-2 ${style.soft}`}>
                 <span className={`text-base font-bold ${style.text}`}>{name(slot)}</span>
-                <span className="text-xs font-medium text-slate-500 tnum">
+                <span className="text-xs font-medium text-ink-soft tnum">
                   h/cap {round.players[slot]?.handicap ?? 0}
                   {shots[slot] !== 0 && ` · ${shots[slot] > 0 ? '+' : ''}${shots[slot]} shot${
                     Math.abs(shots[slot]) === 1 ? '' : 's'}`}
@@ -90,7 +111,7 @@ export default function Play({ round, hole, onHole, onEntry, onBoard }: Props) {
                 <span className="ml-auto flex items-center gap-1">
                   {isBirdie && <Tag tone="emerald">birdie</Tag>}
                   {isSandie && <Tag tone="amber">sandie</Tag>}
-                  <span className="rounded-lg bg-slate-900 px-2 py-1 text-sm font-bold text-white tnum">
+                  <span className="rounded-lg bg-ink px-2 py-1 text-sm font-bold text-white tnum">
                     {points[slot]} pt{points[slot] === 1 ? '' : 's'}
                   </span>
                 </span>
@@ -102,10 +123,14 @@ export default function Play({ round, hole, onHole, onEntry, onBoard }: Props) {
                     key={value}
                     data-testid={`score-${slot}-${value}`}
                     onClick={() => setScore(slot, gross === value ? null : value)}
-                    className={`h-12 flex-1 rounded-lg text-lg font-bold tnum ${
+                    className={`h-14 flex-1 rounded-xl text-xl font-black tnum transition-transform active:scale-95 ${
                       gross === value
-                        ? `${style.bg} text-white`
-                        : 'bg-slate-100 text-slate-700 active:bg-slate-200'
+                        ? `${style.bg} ${style.on} shadow-sm`
+                        : value < par
+                          ? 'bg-surface-2 text-team-a ring-1 ring-inset ring-line'
+                          : value === par
+                            ? 'bg-surface-2 text-ink ring-1 ring-inset ring-ink-faint/40'
+                            : 'bg-surface-2 text-ink-soft'
                     }`}
                   >
                     {value}
@@ -114,7 +139,7 @@ export default function Play({ round, hole, onHole, onEntry, onBoard }: Props) {
                 <button
                   onClick={() => setScore(slot, (gross ?? par + 3) + 1)}
                   aria-label={`Worse score for ${name(slot)}`}
-                  className="h-12 w-11 rounded-lg bg-slate-100 text-lg font-bold text-slate-500 active:bg-slate-200"
+                  className="h-14 w-11 rounded-xl bg-surface-2 text-lg font-bold text-ink-faint active:bg-line"
                 >
                   +
                 </button>
@@ -122,18 +147,18 @@ export default function Play({ round, hole, onHole, onEntry, onBoard }: Props) {
 
               <button
                 onClick={() => toggleSand(slot)}
-                className={`flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2 text-left text-sm font-semibold ${
-                  entry.inSand[slot] ? 'bg-amber-50 text-amber-800' : 'text-slate-400'
+                className={`flex w-full items-center gap-2 border-t border-line px-3 py-2 text-left text-sm font-semibold ${
+                  entry.inSand[slot] ? 'bg-gold-wash text-gold' : 'text-ink-faint'
                 }`}
               >
                 <span className={`inline-flex h-5 w-5 items-center justify-center rounded border-2 ${
-                  entry.inSand[slot] ? 'border-amber-600 bg-amber-500 text-white' : 'border-slate-300'
+                  entry.inSand[slot] ? 'border-gold bg-gold text-white' : 'border-line'
                 }`}>
                   {entry.inSand[slot] ? '✓' : ''}
                 </span>
                 out of a bunker
                 {entry.inSand[slot] && gross != null && gross > par && (
-                  <span className="ml-auto text-xs font-medium text-slate-500">
+                  <span className="ml-auto text-xs font-medium text-ink-soft">
                     no sandie — needs par
                   </span>
                 )}
@@ -169,25 +194,43 @@ export default function Play({ round, hole, onHole, onEntry, onBoard }: Props) {
         />
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex gap-2 border-t border-slate-200 bg-white px-3 pt-2 safe-b">
-        <Button variant="subtle" onClick={() => onHole(hole - 1)} disabled={hole === 1} className="flex-1">
-          ←
-        </Button>
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex items-stretch gap-2 border-t border-line bg-surface px-3 pt-2 safe-b">
+        <button
+          onClick={() => onHole(hole - 1)}
+          disabled={hole === 1}
+          aria-label="Previous hole"
+          className="w-14 shrink-0 rounded-xl bg-surface-2 text-xl font-black text-ink disabled:opacity-30 active:brightness-95"
+        >
+          ‹
+        </button>
+
+        {/* The ledger is the reason anyone is here; tapping it opens the board. */}
         <button
           onClick={onBoard}
           aria-label="Board"
-          className="flex flex-1 flex-col items-center justify-center rounded-xl px-1 active:bg-slate-100"
+          className="flex min-w-0 flex-1 flex-col justify-center rounded-xl px-2 active:bg-surface-2"
         >
-          <span className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-400">
+          <span className="text-[0.6rem] font-bold uppercase tracking-widest text-ink-faint">
             through {totals.holesPlayed} · board ›
           </span>
-          <span className="text-sm font-bold tnum">
-            {([0, 1, 2, 3] as Slot[]).map((s) => formatMoney(totals.money[s])).join(' · ')}
+          <span className="flex gap-2 overflow-hidden text-sm font-black tnum">
+            {([0, 1, 2, 3] as Slot[]).map((s) => (
+              <span key={s} className={totals.money[s] > 0 ? 'text-team-a'
+                : totals.money[s] < 0 ? 'text-coral' : 'text-ink-faint'}>
+                {formatMoney(totals.money[s])}
+              </span>
+            ))}
           </span>
         </button>
-        <Button onClick={() => onHole(hole + 1)} disabled={hole === 18} className="flex-1">
-          →
-        </Button>
+
+        <button
+          onClick={() => onHole(hole + 1)}
+          disabled={hole === 18}
+          aria-label="Next hole"
+          className="w-20 shrink-0 rounded-xl bg-team-a text-2xl font-black text-team-a-ink disabled:opacity-30 active:brightness-90"
+        >
+          ›
+        </button>
       </nav>
     </div>
   )
@@ -201,7 +244,7 @@ function scoreChoices(par: number, gross: number | null): number[] {
 }
 
 function Tag({ tone, children }: { tone: 'emerald' | 'amber'; children: React.ReactNode }) {
-  const map = { emerald: 'bg-emerald-100 text-emerald-800', amber: 'bg-amber-100 text-amber-800' }
+  const map = { emerald: 'bg-team-a-wash text-team-a', amber: 'bg-gold-wash text-gold' }
   return <span className={`rounded px-1.5 py-0.5 text-[0.65rem] font-bold uppercase ${map[tone]}`}>
     {children}
   </span>
@@ -216,7 +259,7 @@ function Picker({ label, names, value, onChange, teamOf }: {
 }) {
   return (
     <Card className="p-3">
-      <p className="mb-2 text-sm font-bold text-slate-700">{label}</p>
+      <p className="mb-2 text-sm font-bold text-ink">{label}</p>
       <div className="flex gap-1">
         {([0, 1, 2, 3] as Slot[]).map((slot) => (
           <button
@@ -225,8 +268,8 @@ function Picker({ label, names, value, onChange, teamOf }: {
             onClick={() => onChange(value === slot ? null : slot)}
             className={`h-12 flex-1 truncate rounded-lg px-1 text-sm font-bold ${
               value === slot
-                ? `${TEAM_STYLE[teamOf(slot)].bg} text-white`
-                : 'bg-slate-100 text-slate-700 active:bg-slate-200'
+                ? `${TEAM_STYLE[teamOf(slot)].bg} ${TEAM_STYLE[teamOf(slot)].on}`
+                : 'bg-surface-2 text-ink active:bg-line'
             }`}
           >
             {names[slot]}
@@ -245,7 +288,7 @@ function Outcome({ result, names, partnerOf, stake }: {
 }) {
   if (!result.settled) {
     return (
-      <p className="py-2 text-center text-sm font-medium text-slate-400">
+      <p className="py-2 text-center text-sm font-medium text-ink-faint">
         Enter all four scores to settle the hole
       </p>
     )
@@ -254,7 +297,7 @@ function Outcome({ result, names, partnerOf, stake }: {
   const skins = result.events.reduce((n, e) => n + e.skins, 0)
   if (result.events.length === 0) {
     return (
-      <Card className="bg-slate-50 p-3 text-center text-sm font-bold text-slate-600">
+      <Card className="bg-surface-2 p-3 text-center text-sm font-bold text-ink-soft">
         <span data-testid="outcome">Halved — nothing on it</span>
       </Card>
     )
@@ -267,20 +310,26 @@ function Outcome({ result, names, partnerOf, stake }: {
   return (
     <Card className="overflow-hidden">
       <div data-testid="outcome"
-        className={`px-3 py-2 text-white ${lead == null ? 'bg-slate-500' : TEAM_STYLE[lead].bg}`}>
-        <p className="text-base font-bold">
-          {lead == null
-            ? 'Skins wash — nobody moves'
-            : `${names[result.teams[lead][0]]} & ${names[result.teams[lead][1]]} · +${
-                formatMoney(Math.abs(result.money[result.teams[lead][0]]))}`}
-        </p>
+        className={`px-3 py-2 text-white ${lead == null ? 'bg-ink-soft' : TEAM_STYLE[lead].bg}`}>
+        {lead == null ? (
+          <p className="text-base font-bold">Skins wash — nobody moves</p>
+        ) : (
+          <div className="flex items-baseline gap-2">
+            <p className="text-base font-bold">
+              {names[result.teams[lead][0]]} &amp; {names[result.teams[lead][1]]}
+            </p>
+            <p className="display ml-auto text-2xl font-black">
+              +{formatMoney(Math.abs(result.money[result.teams[lead][0]]))}
+            </p>
+          </div>
+        )}
       </div>
-      <ul className="divide-y divide-slate-100">
+      <ul className="divide-y divide-line">
         {result.events.map((ev, i) => (
           <li key={i} className="flex items-center gap-2 px-3 py-2 text-sm">
             <span className={`h-2.5 w-2.5 rounded-full ${TEAM_STYLE[ev.team].bg}`} />
             <span className="font-semibold">{SKIN_LABELS[ev.type]}</span>
-            <span className="text-slate-500">
+            <span className="text-ink-soft">
               {ev.bySlot != null
                 ? `${names[ev.bySlot]} (+ ${names[partnerOf(ev.bySlot)]})`
                 : `${names[result.teams[ev.team][0]]} & ${names[result.teams[ev.team][1]]}`}
@@ -291,7 +340,7 @@ function Outcome({ result, names, partnerOf, stake }: {
           </li>
         ))}
       </ul>
-      <p className="bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-500 tnum">
+      <p className="bg-surface-2 px-3 py-1.5 text-xs font-medium text-ink-soft tnum">
         {skins} skin{skins === 1 ? '' : 's'} at {formatMoney(stake)} each
         {result.carryOut > 0 && ` · ${result.carryOut} carried to the next hole`}
       </p>

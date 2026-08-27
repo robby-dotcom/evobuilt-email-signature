@@ -1,35 +1,144 @@
 @import "tailwindcss";
 
-/* Read in direct sun on a phone: light ground, near-black ink, fat numerals. */
+/*
+ * Read on a phone in open sun, and again in the clubhouse afterwards. Light is
+ * a warm paper rather than white — pure white glares outdoors; dark is a deep
+ * pine rather than black so the greens sit on something, not float on a hole.
+ *
+ * The two sides are green and violet: far enough apart in both hue and
+ * lightness to survive sunlight and the common colour-vision deficiencies, and
+ * never the only signal — both names are always spelled out beside the colour.
+ */
 :root {
-  --team-a: #047857;
-  --team-b: #4338ca;
+  --ground:      #f5f3ec;   /* warm paper */
+  --surface:     #ffffff;
+  --surface-2:   #ece9df;   /* sunken rows, inactive buttons */
+  --line:        #ddd8c8;
+  --ink:         #14201a;
+  --ink-soft:    #5d6b62;
+  --ink-faint:   #97a49a;
+
+  --team-a:      #0b7a45;   /* fairway */
+  --team-a-ink:  #ffffff;
+  --team-a-wash: #dff2e6;
+  --team-b:      #5238d6;   /* dusk */
+  --team-b-ink:  #ffffff;
+  --team-b-wash: #e6e1fb;
+
+  --gold:        #b07405;   /* carry pot, sand */
+  --gold-wash:   #fbeecb;
+  --coral:       #c0392f;   /* money going out */
+  --coral-wash:  #fbe4e1;
+
+  --brand:       #0b3d2c;   /* header */
+  --brand-ink:   #eaf5ee;
+
   color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0a1512;
+    --surface:     #12211c;
+    --surface-2:   #1b2f28;
+    --line:        #244137;
+    --ink:         #e9f2ec;
+    --ink-soft:    #9db3a8;
+    --ink-faint:   #668074;
+
+    --team-a:      #34d17e;
+    --team-a-ink:  #052616;
+    --team-a-wash: #123528;
+    --team-b:      #9a86ff;
+    --team-b-ink:  #150b3d;
+    --team-b-wash: #241d4d;
+
+    --gold:        #f0b73d;
+    --gold-wash:   #33280d;
+    --coral:       #ff7a68;
+    --coral-wash:  #3a1b17;
+
+    --brand:       #071d15;
+    --brand-ink:   #d9ecdf;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #0a1512;
+  --surface:     #12211c;
+  --surface-2:   #1b2f28;
+  --line:        #244137;
+  --ink:         #e9f2ec;
+  --ink-soft:    #9db3a8;
+  --ink-faint:   #668074;
+  --team-a:      #34d17e;
+  --team-a-ink:  #052616;
+  --team-a-wash: #123528;
+  --team-b:      #9a86ff;
+  --team-b-ink:  #150b3d;
+  --team-b-wash: #241d4d;
+  --gold:        #f0b73d;
+  --gold-wash:   #33280d;
+  --coral:       #ff7a68;
+  --coral-wash:  #3a1b17;
+  --brand:       #071d15;
+  --brand-ink:   #d9ecdf;
+  color-scheme: dark;
+}
+
+/* inline so the values stay live variables and the dark overrides above win */
+@theme inline {
+  --color-ground:     var(--ground);
+  --color-surface:    var(--surface);
+  --color-surface-2:  var(--surface-2);
+  --color-line:       var(--line);
+  --color-ink:        var(--ink);
+  --color-ink-soft:   var(--ink-soft);
+  --color-ink-faint:  var(--ink-faint);
+  --color-team-a:     var(--team-a);
+  --color-team-a-ink: var(--team-a-ink);
+  --color-team-a-wash:var(--team-a-wash);
+  --color-team-b:     var(--team-b);
+  --color-team-b-ink: var(--team-b-ink);
+  --color-team-b-wash:var(--team-b-wash);
+  --color-gold:       var(--gold);
+  --color-gold-wash:  var(--gold-wash);
+  --color-coral:      var(--coral);
+  --color-coral-wash: var(--coral-wash);
+  --color-brand:      var(--brand);
+  --color-brand-ink:  var(--brand-ink);
 }
 
 html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--ground);
+  color: var(--ink);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
 }
 
-/* Nobody zooms a scorecard by accident mid-round. */
-button, input, select { font: inherit; touch-action: manipulation; }
+button, input, select { font: inherit; color: inherit; touch-action: manipulation; }
 input[type="number"] { -moz-appearance: textfield; }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inline-spin-button { -webkit-appearance: none; margin: 0; }
 
+:focus-visible { outline: 2px solid var(--team-a); outline-offset: 2px; }
+
+/* Scores line up in columns everywhere; proportional digits wobble. */
 .tnum { font-variant-numeric: tabular-nums; }
+.display { letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
 
 .safe-b { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
 .safe-t { padding-top: max(0.5rem, env(safe-area-inset-top)); }
 
 @media (prefers-reduced-motion: no-preference) {
-  .pop { animation: pop 180ms ease-out; }
-  @keyframes pop { from { transform: scale(0.94); opacity: 0.7 } to { transform: none; opacity: 1 } }
+  .pop { animation: pop 200ms cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes pop { from { transform: scale(.9); opacity: .5 } to { transform: none; opacity: 1 } }
+  .rise { animation: rise 220ms ease-out both; }
+  @keyframes rise { from { transform: translateY(6px); opacity: 0 } to { transform: none; opacity: 1 } }
 }

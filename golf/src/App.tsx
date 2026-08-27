@@ -142,12 +142,12 @@ export default function App() {
   if (busy) return <Splash>{busy}</Splash>
 
   const header = (
-    <div className="flex items-center gap-2 bg-emerald-800 px-3 pb-2 text-white safe-t">
+    <div className="flex items-center gap-2 bg-brand px-3 pb-2 text-brand-ink safe-t">
       <button onClick={goHome} className="text-lg font-black tracking-tight">⛳ Hollywood</button>
       {round && view !== 'play' && (
         <button
           onClick={() => setView('play')}
-          className="rounded-lg bg-emerald-700 px-2 py-1 text-xs font-bold"
+          className="rounded-lg bg-brand-ink/15 px-2 py-1 text-xs font-bold text-brand-ink"
         >
           ‹ hole {hole}
         </button>
@@ -247,29 +247,29 @@ function Home({ rounds, onOpen, onNew, joinCode, setJoinCode, onJoin }: {
       <Button onClick={onNew} className="w-full text-lg">Start a round</Button>
 
       <Card className="overflow-hidden">
-        <h2 className="border-b border-slate-100 px-3 py-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+        <h2 className="border-b border-line px-3 py-2 text-sm font-bold uppercase tracking-wide text-ink-soft">
           Your rounds
         </h2>
         {rounds.length === 0 ? (
           <Empty title="Nothing yet">Start a round, then share its code with the other three.</Empty>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-line">
             {rounds.map((r) => {
               const t = computeRound(r.course, r.players, r.entries, r.settings)
               return (
                 <li key={r.code}>
-                  <button onClick={() => onOpen(r)} className="w-full px-3 py-3 text-left active:bg-slate-100">
+                  <button onClick={() => onOpen(r)} className="w-full px-3 py-3 text-left active:bg-surface-2">
                     <div className="flex items-baseline gap-2">
                       <span className="font-bold">{r.course.name}</span>
-                      <span className="ml-auto rounded bg-slate-900 px-1.5 py-0.5 text-xs font-bold tracking-widest text-white">
+                      <span className="ml-auto rounded bg-ink px-1.5 py-0.5 text-xs font-bold tracking-widest text-white">
                         {r.code}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs text-ink-soft">
                       {r.playedOn} · {t.holesPlayed}/18
                       {r.seriesCode && ` · ${r.seriesCode}`}
                     </p>
-                    <p className="mt-1 text-xs font-semibold text-slate-700 tnum">
+                    <p className="mt-1 text-xs font-semibold text-ink tnum">
                       {r.players.map((p, i) => `${p.name} ${formatMoney(t.money[i])}`).join(' · ')}
                     </p>
                   </button>
@@ -281,7 +281,7 @@ function Home({ rounds, onOpen, onNew, joinCode, setJoinCode, onJoin }: {
       </Card>
 
       <Card className="space-y-2 p-3">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Join a round</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Join a round</h2>
         <div className="flex gap-2">
           <input
             className={`${inputClass} flex-1 text-center text-lg font-bold uppercase tracking-widest`}
@@ -290,7 +290,7 @@ function Home({ rounds, onOpen, onNew, joinCode, setJoinCode, onJoin }: {
           />
           <Button onClick={onJoin}>Join</Button>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-ink-soft">
           Or just open the link the round was started on.
         </p>
       </Card>
@@ -304,13 +304,13 @@ function Tabs({ view, setView }: { view: View; setView: (v: View) => void }) {
   const tabs: [View, string][] = [['play', 'Play'], ['board', 'Board'], ['settle', 'Settle']]
   if (view === 'play') return null
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-slate-200 bg-white safe-b">
+    <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-surface safe-b">
       {tabs.map(([key, label]) => (
         <button
           key={key}
           onClick={() => setView(key)}
           className={`flex-1 py-3 text-sm font-bold ${
-            view === key ? 'text-emerald-700' : 'text-slate-400'
+            view === key ? 'text-team-a' : 'text-ink-faint'
           }`}
         >
           {label}
@@ -322,7 +322,7 @@ function Tabs({ view, setView }: { view: View; setView: (v: View) => void }) {
 
 const Splash = ({ children }: { children: React.ReactNode }) => (
   <div className="grid min-h-full place-items-center p-8 text-center">
-    <p className="text-lg font-semibold text-slate-600">{children}</p>
+    <p className="text-lg font-semibold text-ink-soft">{children}</p>
   </div>
 )
 

@@ -62,7 +62,7 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
               value={slope} onChange={(e) => setSlope(e.target.value)} placeholder="130" />
           </Field>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-ink-soft">
           Both are printed on the card, next to the tee colour. With them, players
           enter a GA index and the app works out the shots; without them, they
           enter shots directly.
@@ -70,40 +70,40 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
       </Card>
 
       <Card className="p-3">
-        <p className="mb-2 text-sm font-bold text-slate-700">Start from a layout</p>
+        <p className="mb-2 text-sm font-bold text-ink">Start from a layout</p>
         <div className="flex gap-1">
           {PAR_PRESETS.map((preset) => (
             <button
               key={preset.label}
               title={preset.hint}
               onClick={() => setPars([...preset.pars])}
-              className="min-h-[3rem] flex-1 rounded-xl bg-slate-100 px-1 text-sm font-bold active:bg-slate-200"
+              className="min-h-[3rem] flex-1 rounded-xl bg-surface-2 px-1 text-sm font-bold active:bg-line"
             >
               {preset.label}
             </button>
           ))}
         </div>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-ink-soft">
           Then correct any hole below and type the stroke index off the card.
         </p>
       </Card>
 
       <Card className="overflow-hidden">
-        <div className="flex items-baseline gap-2 border-b border-slate-100 px-3 py-2">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">The card</h2>
+        <div className="flex items-baseline gap-2 border-b border-line px-3 py-2">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">The card</h2>
           <span className="ml-auto text-sm font-bold tnum">
             par {totalPar}
           </span>
-          <span className="text-xs text-slate-500 tnum">
+          <span className="text-xs text-ink-soft tnum">
             {mix.threes}×3 · {mix.fours}×4 · {mix.fives}×5
           </span>
         </div>
 
-        <div className="grid grid-cols-[2.5rem_1fr_1fr] gap-x-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="grid grid-cols-[2.5rem_1fr_1fr] gap-x-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">
           <span>Hole</span><span>Par</span><span>Stroke index</span>
         </div>
 
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {Array.from({ length: 18 }, (_, i) => (
             <li key={i} className="grid grid-cols-[2.5rem_1fr_1fr] items-center gap-x-2 px-3 py-1.5">
               <span className="text-sm font-bold tnum">{i + 1}</span>
@@ -114,7 +114,7 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
                     data-testid={`par-${i + 1}-${p}`}
                     onClick={() => setPars(setAt(pars, i, p))}
                     className={`h-10 flex-1 rounded-lg text-sm font-bold tnum ${
-                      pars[i] === p ? 'bg-emerald-700 text-white' : 'bg-slate-100 active:bg-slate-200'
+                      pars[i] === p ? 'bg-team-a text-white' : 'bg-surface-2 active:bg-line'
                     }`}
                   >
                     {p}
@@ -124,7 +124,7 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
               <input
                 data-testid={`si-${i + 1}`}
                 type="number" inputMode="numeric" min={1} max={18}
-                className="h-10 w-full rounded-lg border border-slate-300 px-2 text-center text-sm font-bold tnum"
+                className="h-10 w-full rounded-lg border border-line px-2 text-center text-sm font-bold tnum"
                 value={index[i]}
                 onChange={(e) => setIndex(setAt(index, i, Number(e.target.value)))}
               />
@@ -134,12 +134,12 @@ export default function CourseEditor({ initial, onSave, onCancel }: {
       </Card>
 
       {(parError || indexError) && (
-        <p className="rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+        <p className="rounded-xl bg-coral-wash px-3 py-2 text-sm font-semibold text-coral">
           {parError ?? indexError}
         </p>
       )}
       {!indexError && totalPar !== 72 && (
-        <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+        <p className="rounded-xl bg-gold-wash px-3 py-2 text-sm font-medium text-gold">
           That adds up to {totalPar}, not the usual 72. Fine if the course really is —
           worth a second look if not.
         </p>

@@ -38,16 +38,16 @@ export default function Settle({ round, series }: { round: LocalRound; series: L
   return (
     <div className="space-y-3 p-3 pb-24">
       <Card className="overflow-hidden">
-        <h2 className="border-b border-slate-100 bg-emerald-700 px-3 py-2 text-sm font-bold uppercase tracking-wide text-white">
+        <h2 className="border-b border-line bg-team-a px-3 py-2 text-sm font-bold uppercase tracking-wide text-white">
           Weekend · {series.length} round{series.length === 1 ? '' : 's'}
         </h2>
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {[...slots].sort((a, b) => weekend[b] - weekend[a]).map((slot) => (
             <li key={slot} className="flex items-center px-3 py-3">
               <span className="text-base font-bold">{name(slot)}</span>
               <span className={`ml-auto text-2xl font-black tnum ${
-                weekend[slot] > 0 ? 'text-emerald-700'
-                  : weekend[slot] < 0 ? 'text-red-700' : 'text-slate-400'
+                weekend[slot] > 0 ? 'text-team-a'
+                  : weekend[slot] < 0 ? 'text-coral' : 'text-ink-faint'
               }`}>
                 {formatMoney(weekend[slot])}
               </span>
@@ -57,18 +57,18 @@ export default function Settle({ round, series }: { round: LocalRound; series: L
       </Card>
 
       <Card className="overflow-hidden">
-        <h2 className="border-b border-slate-100 px-3 py-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+        <h2 className="border-b border-line px-3 py-2 text-sm font-bold uppercase tracking-wide text-ink-soft">
           Who pays who
         </h2>
         {weekendPayments.length === 0 ? (
           <Empty title="All square">Nothing owed either way.</Empty>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-line">
             {weekendPayments.map((p, i) => (
               <li key={i} className="flex items-center gap-2 px-3 py-3">
-                <span className="text-base font-bold text-red-700">{name(p.from as Slot)}</span>
-                <span className="text-sm text-slate-400">pays</span>
-                <span className="text-base font-bold text-emerald-700">{name(p.to as Slot)}</span>
+                <span className="text-base font-bold text-coral">{name(p.from as Slot)}</span>
+                <span className="text-sm text-ink-faint">pays</span>
+                <span className="text-base font-bold text-team-a">{name(p.to as Slot)}</span>
                 <span className="ml-auto text-xl font-black tnum">{formatMoney(p.cents)}</span>
               </li>
             ))}
@@ -77,10 +77,10 @@ export default function Settle({ round, series }: { round: LocalRound; series: L
       </Card>
 
       <Card className="overflow-hidden">
-        <h2 className="border-b border-slate-100 px-3 py-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+        <h2 className="border-b border-line px-3 py-2 text-sm font-bold uppercase tracking-wide text-ink-soft">
           This round only
         </h2>
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {slots.map((slot) => (
             <li key={slot} className="flex items-center px-3 py-2 text-sm">
               <span className="font-semibold">{name(slot)}</span>
@@ -92,21 +92,21 @@ export default function Settle({ round, series }: { round: LocalRound; series: L
 
       {series.length > 1 && (
         <Card className="overflow-hidden">
-          <h2 className="border-b border-slate-100 px-3 py-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+          <h2 className="border-b border-line px-3 py-2 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Round by round
           </h2>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-line">
             {series.map((r) => {
               const m = computeRound(r.course, r.players, r.entries, r.settings)
               return (
                 <li key={r.code} className="px-3 py-2">
                   <p className="text-sm font-bold">
                     {r.course.name}
-                    <span className="ml-2 font-medium text-slate-400">
+                    <span className="ml-2 font-medium text-ink-faint">
                       {r.playedOn} · {m.holesPlayed}/18
                     </span>
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-600 tnum">
+                  <p className="mt-0.5 text-xs text-ink-soft tnum">
                     {r.players.map((p, i) => `${p.name} ${formatMoney(m.money[i])}`).join(' · ')}
                   </p>
                 </li>

@@ -97,13 +97,13 @@ export default function Setup({
               ))}
             </select>
           ) : (
-            <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+            <p className="rounded-xl bg-gold-wash px-3 py-2 text-sm font-medium text-gold">
               No courses yet. Add one from the card — pars and stroke index.
             </p>
           )}
         </Field>
         {course && rated && (
-          <p className="text-xs font-medium text-slate-500 tnum">
+          <p className="text-xs font-medium text-ink-soft tnum">
             {course.tee ? `${course.tee} tees · ` : ''}par {par} · rating {course.rating} · slope {course.slope}
           </p>
         )}
@@ -113,27 +113,27 @@ export default function Setup({
       </Card>
 
       <Card className="overflow-hidden">
-        <div className="border-b border-slate-100 px-3 py-2">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Players</h2>
-          <p className="mt-0.5 text-xs text-slate-500">
+        <div className="border-b border-line px-3 py-2">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Players</h2>
+          <p className="mt-0.5 text-xs text-ink-soft">
             Order sets the draw: {name(players, 0)} &amp; {name(players, 1)} first,
             then {name(players, 0)} &amp; {name(players, 2)},
             then {name(players, 0)} &amp; {name(players, 3)}.
           </p>
         </div>
 
-        <div className="grid grid-cols-[1.25rem_1fr_4rem_4.5rem] items-center gap-x-2 px-3 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-400">
+        <div className="grid grid-cols-[1.25rem_1fr_4rem_4.5rem] items-center gap-x-2 px-3 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-faint">
           <span />
           <span>Name</span>
           <span className="text-center">{rated ? 'Index' : 'Shots'}</span>
           <span className="text-center">{rated ? 'Shots' : ''}</span>
         </div>
 
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {players.map((p, i) => (
             <li key={i} className="px-3 py-2">
               <div className="grid grid-cols-[1.25rem_1fr_4rem_4.5rem] items-center gap-x-2">
-                <span className="text-sm font-bold text-slate-400 tnum">{i + 1}</span>
+                <span className="text-sm font-bold text-ink-faint tnum">{i + 1}</span>
                 <input
                   className={inputClass}
                   placeholder={`Player ${i + 1}`}
@@ -163,8 +163,8 @@ export default function Setup({
                     onClick={() => setEditing(i)}
                     className={`min-h-[3rem] rounded-xl text-lg font-black tnum ${
                       p.overridden
-                        ? 'bg-amber-100 text-amber-900'
-                        : 'bg-emerald-700 text-white'
+                        ? 'bg-gold-wash text-gold'
+                        : 'bg-team-a text-white'
                     }`}
                   >
                     {p.handicap}
@@ -173,11 +173,11 @@ export default function Setup({
               </div>
 
               {rated && (
-                <p className="mt-1 pl-7 text-[0.7rem] text-slate-500 tnum">
+                <p className="mt-1 pl-7 text-[0.7rem] text-ink-soft tnum">
                   {p.overridden
                     ? <>set by hand ·{' '}
                         <button
-                          className="font-semibold text-emerald-700 underline"
+                          className="font-semibold text-team-a underline"
                           onClick={() => setPlayer(i, { overridden: false, handicap: shotsFor(p.index) })}
                         >
                           use {shotsFor(p.index)}
@@ -191,7 +191,7 @@ export default function Setup({
           ))}
         </ul>
 
-        <p className="bg-slate-50 px-3 py-2 text-xs text-slate-500">
+        <p className="bg-surface-2 px-3 py-2 text-xs text-ink-soft">
           {rated
             ? 'Enter your exact GA index. Shots are worked out from the tee’s rating and slope — tap the number to set it by hand.'
             : 'This course has no rating, so enter the shots you get directly.'}
@@ -257,11 +257,11 @@ function Toggle({ checked, onChange, label, hint }: {
   return (
     <button onClick={() => onChange(!checked)} className="flex w-full items-start gap-3 text-left">
       <span className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 text-sm font-bold ${
-        checked ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-slate-300 text-transparent'
+        checked ? 'border-team-a bg-team-a text-white' : 'border-line text-transparent'
       }`}>✓</span>
       <span>
-        <span className="block text-sm font-semibold text-slate-800">{label}</span>
-        <span className="block text-xs text-slate-500">{hint}</span>
+        <span className="block text-sm font-semibold text-ink">{label}</span>
+        <span className="block text-xs text-ink-soft">{hint}</span>
       </span>
     </button>
   )
