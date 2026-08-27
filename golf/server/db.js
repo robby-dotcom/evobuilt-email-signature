@@ -12,10 +12,23 @@ const here = dirname(fileURLToPath(import.meta.url))
  */
 export const configured = Boolean(process.env.DATABASE_URL)
 
+/**
+ * Supabase and most hosts terminate TLS with a chain Node won't verify, so we
+ * accept it there. A local or explicitly disabled connection gets no SSL at all,
+ * which is what lets this run against a plain Postgres.
+ */
+function sslFor(url) {
+  if (/sslmode=disable/.test(url)) return false
+  if (/@(localhost|127\.0\.0\.1|\[::1\])[:/]/.test(url) || url.startsWith('postgres://golf@/')) {
+    return false
+  }
+  return { rejectUnauthorized: false }
+}
+
 export const pool = configured
   ? new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      ssl: sslFor(process.env.DATABASE_URL),
       max: 5,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
