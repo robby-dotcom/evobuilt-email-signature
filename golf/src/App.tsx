@@ -14,25 +14,24 @@ import { Button, Card, Empty, SyncBadge, inputClass } from './components/ui'
 type View = 'home' | 'setup' | 'course' | 'play' | 'board' | 'settle'
 
 /**
- * Round links have to survive hosts with no rewrite rules (GitHub Pages, plain
- * object storage), so the code is read from the hash as well as the path and
- * written to whichever form the app was opened with.
+ * Round links always carry the code in the hash.
+ *
+ * A path link only works where the host rewrites unknown paths back to the
+ * app; on a plain static host — object storage, a bare file server, Pages
+ * without a fallback — reloading one 404s and the round looks lost. The hash
+ * costs nothing and works on every host, so it is not worth making the URL
+ * shape depend on where this happens to be deployed. Paths are still read so
+ * any link shared earlier keeps working.
  */
-const usesHash = () =>
-  window.location.hash.startsWith('#/') ||
-  !/^\/(r\/)?$|^\/r\//.test(window.location.pathname)
-
 const codeFromPath = () => {
   const from = (s: string) => s.match(/\/r\/([A-Za-z0-9]{4,10})/)
   const m = from(window.location.hash) ?? from(window.location.pathname)
   return m ? m[1].toUpperCase() : null
 }
 
-const linkFor = (code: string) =>
-  usesHash() ? `${window.location.pathname}#/r/${code}` : `/r/${code}`
+const linkFor = (code: string) => `${window.location.pathname}#/r/${code}`
 
-const homeLink = () => (usesHash() ? `${window.location.pathname}#/` : '/')
-
+const homeLink = () => `${window.location.pathname}#/`
 export default function App() {
   const [view, setView] = useState<View>(() => (codeFromPath() ? 'play' : 'home'))
   const [round, setRound] = useState<LocalRound | null>(null)
