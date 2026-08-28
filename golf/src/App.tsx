@@ -144,6 +144,21 @@ export default function App() {
   const header = (
     <div className="flex items-center gap-2 bg-brand px-3 pb-2 text-brand-ink safe-t">
       <button onClick={goHome} className="text-lg font-black tracking-tight">⛳ Hollywood</button>
+      {round && (
+        <button
+          onClick={() => {
+            const link = `${location.origin}${location.pathname}#/r/${round.code}`
+            navigator.clipboard?.writeText(link).then(
+              () => window.alert(`Copied:\n${link}\n\nOr they can type the code ${round.code}`),
+              () => window.alert(`Round code: ${round.code}`),
+            )
+          }}
+          className="rounded-lg bg-brand-ink/15 px-2 py-1 text-xs font-black tracking-widest"
+          title="Copy the link to share"
+        >
+          {round.code}
+        </button>
+      )}
       {round && view !== 'play' && (
         <button
           onClick={() => setView('play')}

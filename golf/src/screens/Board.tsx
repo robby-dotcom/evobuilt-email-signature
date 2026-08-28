@@ -24,7 +24,7 @@ export default function Board({ round, onHole }: { round: LocalRound; onHole: (h
           {ranked.map((slot) => (
             <li key={slot} className="flex items-center gap-3 px-3 py-3">
               <span className="text-base font-bold">{name(slot)}</span>
-              <span className="text-xs font-medium text-ink-soft tnum">
+              <span className="rounded-md bg-surface-2 px-2 py-1 text-xs font-bold text-ink tnum">
                 {totals.points[slot]} pts · {totals.totalSkins[slot]} skins
               </span>
               <span

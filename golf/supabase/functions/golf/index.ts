@@ -55,9 +55,16 @@ async function getRound(code: string) {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
-  // Everything after /functions/v1/golf is the route.
-  const path = new URL(req.url).pathname.replace(/^\/functions\/v1\/golf/, '') || '/'
-  const parts = path.split('/').filter(Boolean)
+  // The gateway may pass the full public path or strip /functions/v1 first.
+  // Matching only the long form left every request falling through to 404,
+  // which is why nothing synced and nobody could join a round.
+  const pathname = new URL(req.url).pathname
+  let route = pathname
+  for (const prefix of ['/functions/v1/golf', '/golf']) {
+    if (pathname === prefix) { route = '/'; break }
+    if (pathname.startsWith(`${prefix}/`)) { route = pathname.slice(prefix.length); break }
+  }
+  const parts = route.split('/').filter(Boolean)
 
   try {
     if (parts[0] === 'health') return json({ ok: true, database: true, dbReady: true })
@@ -160,7 +167,7 @@ Deno.serve(async (req) => {
 
     return json({ error: 'not_found' }, 404)
   } catch (err) {
-    console.error(req.method, path, err)
+    console.error(req.method, route, err)
     return json({ error: 'server_error', message: String((err as Error).message ?? err) }, 500)
   }
 })
