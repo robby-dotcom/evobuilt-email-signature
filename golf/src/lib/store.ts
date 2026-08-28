@@ -114,6 +114,28 @@ export const saveCourse = (course: Course & { id?: string; location?: string }) 
 
 export const fetchRound = (code: string) => api(`/rounds/${code}`)
 
+const isServerId = (id?: string) => !!id && /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id)
+
+/**
+ * Put a round on the server so the others can join it.
+ *
+ * A seeded or locally-entered course only has a local id, and the rounds table
+ * needs the real one, so the course goes up first and its returned id is what
+ * the round is created against. Without this the round creation fails and
+ * nobody can join - which is exactly what happened.
+ */
+export async function shareRound(round: LocalRound): Promise<LocalRound> {
+  let courseId = round.courseId
+  if (!isServerId(courseId)) {
+    const saved = await saveCourse({ ...round.course, id: undefined })
+    if (!isServerId(saved?.id)) throw new Error('course not saved')
+    courseId = saved.id
+  }
+  const shared = saveRound({ ...round, courseId })
+  await pushRound(shared)
+  return shared
+}
+
 export const pushRound = (round: LocalRound) =>
   api('/rounds', {
     method: 'POST',

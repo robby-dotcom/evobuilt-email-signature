@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { HoleEntry } from './lib/scoring'
 import { computeRound, formatMoney } from './lib/scoring'
 import * as store from './lib/store'
@@ -40,8 +40,11 @@ export default function App() {
     () => store.mergeCourses(store.loadLocalCourses(), SEED_COURSES),
   )
   const [pending, setPending] = useState(0)
+  // null = not attempted, true = on the server and joinable, false = local only.
+  const [shared, setShared] = useState<boolean | null>(null)
   const [database, setDatabase] = useState(false)
   const [joinCode, setJoinCode] = useState('')
+  const sharedRef = useRef<boolean | null>(null)
   // A course you just entered is the one you meant to play; without this the
   // picker stays on whatever sorted first and the round uses the wrong card.
   const [pickedCourse, setPickedCourse] = useState<string | undefined>()
@@ -59,10 +62,21 @@ export default function App() {
   }, [])
 
   /* Keep the pending badge honest without hammering the network. */
+  useEffect(() => { sharedRef.current = shared }, [shared])
+
   useEffect(() => {
     const tick = () => setPending(store.pendingCount())
     tick()
-    const id = setInterval(() => { void store.flush().then(setPending) }, 8000)
+    const id = setInterval(() => {
+      void store.flush().then(setPending)
+      setRound((r) => {
+        if (r && sharedRef.current === false) {
+          void store.shareRound(r).then((s) => { sharedRef.current = true; setShared(true); setRound(s) })
+            .catch(() => {})
+        }
+        return r
+      })
+    }, 8000)
     return () => clearInterval(id)
   }, [])
 
@@ -109,7 +123,10 @@ export default function App() {
       settings: result.settings,
     })
     store.saveRound(next)
-    void store.pushRound(next).catch(() => { /* queued locally; nothing to do */ })
+    setShared(null)
+    void store.shareRound(next)
+      .then((saved) => { setRound(saved); setShared(true) })
+      .catch(() => setShared(false))
     setHole(1)
     openRound(next)
   }, [openRound])
@@ -153,10 +170,12 @@ export default function App() {
               () => window.alert(`Round code: ${round.code}`),
             )
           }}
-          className="rounded-lg bg-brand-ink/15 px-2 py-1 text-xs font-black tracking-widest"
+          className={`rounded-lg px-2 py-1 text-xs font-black tracking-widest ${
+            shared === false ? 'bg-gold text-surface' : 'bg-brand-ink/15'
+          }`}
           title="Copy the link to share"
         >
-          {round.code}
+          {shared === false ? 'not shared — tap' : round.code}
         </button>
       )}
       {round && view !== 'play' && (
